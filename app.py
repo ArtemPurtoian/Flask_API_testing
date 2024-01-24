@@ -57,5 +57,37 @@ def get_users():
     return jsonify({"users": users})
 
 
+# Get a user by id
+def get_user_by_id(user_id):
+    for user in users:
+        if user["id"] == user_id:
+            return user
+    return None
+
+
+# DELETE request - receives only "id" in the body
+@app.route("/api/users", methods=["DELETE"])
+def delete_user():
+    global user_id_counter
+    data = request.get_json()
+    user_id = data.get("id")
+
+    if user_id is not None:
+        user = get_user_by_id(user_id)
+        if user:
+            user_name = user.get('user_name')
+            users.remove(user)
+            user_id_counter -= 1
+            return jsonify(message=
+                           f"User '{user_id}' ('{user_name}') "
+                           f"deleted successfully")
+        else:
+            # displaying an error if there is no user with such id
+            return jsonify(error="User not found"), 404
+    else:
+        # displaying an error if other key is passed in the body
+        return jsonify(error="'id' is required in the request body"), 400
+
+
 if __name__ == "__main__":
     app.run()
