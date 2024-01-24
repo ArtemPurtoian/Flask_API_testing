@@ -70,14 +70,23 @@ def get_user_by_id(user_id):
 def delete_user():
     global user_id_counter
     data = request.get_json()
-    user_id = data.get("id")
+    user_id = data.get("id")  # getting the id from json object
 
     if user_id is not None:
-        user = get_user_by_id(user_id)
-        if user:
-            user_name = user.get('user_name')
-            users.remove(user)
-            user_id_counter -= 1
+        user_to_delete = get_user_by_id(user_id)  # getting the id of a user
+
+        # deleting a user if the specified id matches the user id
+        if user_to_delete:
+            user_name = user_to_delete.get('user_name')
+            users.remove(user_to_delete)
+            user_id_counter -= 1  # decrease the global user id counter
+
+            """decreasing the id of each remaining user from the users list 
+            after deleting
+            """
+            for user in users:
+                user["id"] -= 1
+
             return jsonify(message=
                            f"User '{user_id}' ('{user_name}') "
                            f"deleted successfully")
