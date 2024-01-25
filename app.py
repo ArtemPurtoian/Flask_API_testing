@@ -98,5 +98,42 @@ def delete_user():
         return jsonify(error="'id' is required in the request body"), 400
 
 
+# PUT request - receives the full user object
+@app.route("/api/users", methods=["PUT"])
+def update_user():
+    data = request.get_json()
+
+    if ("id" not in data or "user_name" not in data or "gender" not in data
+            or "age" not in data):
+        return jsonify(error="Missing required fields"), 400
+
+    changed_user = {
+        "id": data["id"],
+        "user_name": data["user_name"],
+        "gender": data["gender"],
+        "age": data["age"]
+    }
+
+    for user in users:
+        # displaying an error if a username already exists
+        if not is_name_unique(data['user_name']):
+            return jsonify(error=f"User '{data['user_name']}' already "
+                                 f"exists"), 400
+        elif changed_user["id"] == user["id"]:
+            # changing the user info if PUT request matches the user id
+            user["user_name"] = changed_user["user_name"]
+            user["gender"] = changed_user["gender"]
+            user["age"] = changed_user["age"]
+
+            # displaying a message after a successful user info update
+            return jsonify(
+                message=f"Username with ID '{user['id']}' "
+                        f"changed to '{changed_user['user_name']}'"), 200
+
+        # displaying an error if a user is not found
+    return jsonify(
+        error=f"User not found"), 404
+
+
 if __name__ == "__main__":
     app.run()
