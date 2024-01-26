@@ -42,12 +42,14 @@ def create_user():
     # displaying an error if a username already exists
     if not is_name_unique(data['user_name']):
         return jsonify(error=f"User '{data['user_name']}' already exists"), 400
+
+    # displaying errors if values' data types are not valid
     elif not isinstance(data['user_name'], str):
         return jsonify(error=f"'user_name' must be a string"), 400
     elif not isinstance(data["gender"], str):
-        return jsonify(error="'gender' must be a string")
+        return jsonify(error="'gender' must be a string"), 400
     elif not isinstance(data["age"], int):
-        return jsonify(error="'age' must be an integer")
+        return jsonify(error="'age' must be an integer"), 400
     else:
         # adding a new user if username is unique and increment the id counter
         users.append(new_user)
