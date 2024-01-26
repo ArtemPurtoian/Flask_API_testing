@@ -35,7 +35,14 @@ However, if you'd like to manually make some requests run the app
 ---
 ## Running Tests
 
-* > pytest
+* To run locally
+  > pytest
+* To run in a Docker container
+  > docker build -t flask_api .
+
+  > docker run flask_api
+
+
 
 The tests cover various scenarios, including creating a new user, 
 getting a users list, handling duplicate usernames, checking the status codes, 
