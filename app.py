@@ -29,8 +29,19 @@ def create_user():
     global user_id_counter
     data = request.get_json()
 
-    if "user_name" not in data or "gender" not in data or "age" not in data:
-        return jsonify(error="Missing required fields"), 400
+    # defining all required fields for the POST request
+    required_fields = ["user_name", "gender", "age"]
+    missing_fields = [field for field in required_fields if field not in data]
+
+    # displaying an error if some fields are missing
+    if len(missing_fields) == 1:
+        return jsonify(error=f"Missing {missing_fields} field"), 400
+    elif len(missing_fields) > 1:
+        return jsonify(error=f"Missing {missing_fields} fields"), 400
+
+    # # displaying an error if some field is missing
+    # if "user_name" not in data or "gender" not in data or "age" not in data:
+    #     return jsonify(error="Missing required fields"), 400
 
     new_user = {
         "id": user_id_counter,
@@ -95,14 +106,18 @@ def delete_user():
             for user in users:
                 user["id"] -= 1
 
+            # displaying a message after a successful user deletion
             return jsonify(message=
                            f"User '{user_id}' ('{user_name}') "
                            f"deleted successfully")
+        # displaying an error if id is not type int
+        elif not isinstance(user_id, int):
+            return jsonify(error="'id' must be an integer"), 400
         else:
             # displaying an error if there is no user with such id
             return jsonify(error="User not found"), 404
     else:
-        # displaying an error if other key is passed in the body
+        # displaying an error if another key is passed in the body
         return jsonify(error="'id' is required in the request body"), 400
 
 
@@ -111,9 +126,25 @@ def delete_user():
 def update_user():
     data = request.get_json()
 
-    if ("id" not in data or "user_name" not in data or "gender" not in data
-            or "age" not in data):
-        return jsonify(error="Missing required fields"), 400
+    # defining all required fields for the PUT request
+    required_fields = ["id", "user_name", "gender", "age"]
+    missing_fields = [field for field in required_fields if field not in data]
+
+    # displaying an error if some field are missing
+    if len(missing_fields) == 1:
+        return jsonify(error=f"Missing {missing_fields} field"), 400
+    elif len(missing_fields) > 1:
+        return jsonify(error=f"Missing {missing_fields} fields"), 400
+
+    # displaying errors if values' data types are not valid
+    elif not isinstance(data["id"], int):
+        return jsonify(error=f"'id' must be an integer"), 400
+    elif not isinstance(data['user_name'], str):
+        return jsonify(error=f"'user_name' must be a string"), 400
+    elif not isinstance(data["gender"], str):
+        return jsonify(error="'gender' must be a string"), 400
+    elif not isinstance(data["age"], int):
+        return jsonify(error="'age' must be an integer"), 400
 
     changed_user = {
         "id": data["id"],
