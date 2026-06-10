@@ -1,33 +1,73 @@
 from http import HTTPStatus
 
+from tests.data import (
+    UPDATED_USER,
+    VALID_USER,
+    SECOND_USER,
+    MISSING_AGE
+)
 
-""" PUT user """
 
-# status
+def test_put_status_ok(client, created_user):
+    response = client.put(
+        "/api/users/1",
+        json=UPDATED_USER
+    )
 
-
-def test_put_status_ok(update_user):
-    response = update_user[0]
     assert response.status_code == HTTPStatus.OK
 
 
-def test_put_status_bad_request_missing_fields(update_user_missing_fields):
-    assert update_user_missing_fields.status_code == HTTPStatus.BAD_REQUEST
+def test_put_updates_user(client, created_user):
+    response = client.put(
+        "/api/users/1",
+        json=UPDATED_USER
+    )
+
+    user = response.get_json()["user"]
+
+    assert user["user_name"] == "john"
+    assert user["age"] == 25
 
 
-def test_put_status_bad_request_already_exists(update_user_already_exists):
-    assert update_user_already_exists.status_code == HTTPStatus.BAD_REQUEST
+def test_put_user_not_found(client):
+    response = client.put(
+        "/api/users/999",
+        json=UPDATED_USER
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_put_status_bad_request_value_is_not_valid(update_user_value_is_not_valid):
-    assert update_user_value_is_not_valid.status_code == HTTPStatus.BAD_REQUEST
+def test_put_missing_fields(client, created_user):
+    response = client.put(
+        "/api/users/1",
+        json=MISSING_AGE
+    )
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
-# messages, errors, data types
+def test_put_duplicate_username(client):
+    client.post("/api/users", json=VALID_USER)
+    client.post("/api/users", json=SECOND_USER)
+
+    response = client.put(
+        "/api/users/2",
+        json={
+            "user_name": "alex",
+            "gender": "male",
+            "age": 20
+        }
+    )
+
+    assert response.status_code == HTTPStatus.CONFLICT
 
 
-def test_put_message_changed_successfully(update_user):
-    response, put_body = update_user
-    assert (response.json["message"] ==
-            f"Username with ID '{put_body['id']}' changed "
-            f"to '{put_body['user_name']}'")
+def test_put_invalid_json(client):
+    response = client.put(
+        "/api/users/1",
+        data='{"user_name":"john",}',
+        content_type="application/json"
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST

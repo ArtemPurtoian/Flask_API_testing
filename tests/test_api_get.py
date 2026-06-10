@@ -1,27 +1,34 @@
 from http import HTTPStatus
 
 
-""" GET welcome """
+def test_get_welcome_status_ok(client):
+    response = client.get("/api/welcome")
+
+    assert response.status_code == HTTPStatus.OK
 
 
-def test_get_welcome_status_ok(get_welcome_url):
-    assert get_welcome_url.status_code == HTTPStatus.OK
+def test_get_welcome_message(client):
+    response = client.get("/api/welcome")
+
+    assert response.get_json()["message"] == "Hi, this is your API!"
 
 
-def test_get_welcome_message(get_welcome_url):
-    assert get_welcome_url.json["message"] == "Hi, this is your API!"
+def test_get_users_status_ok(client):
+    response = client.get("/api/users")
+
+    assert response.status_code == HTTPStatus.OK
 
 
-""" GET users """
+def test_get_users_returns_empty_list(client):
+    response = client.get("/api/users")
 
-# status
-
-
-def test_get_users_status_ok(get_users_url):
-    assert get_users_url.status_code == HTTPStatus.OK
-
-# users present in response, content-type
+    assert response.get_json()["users"] == []
 
 
-def test_get_users_in_response(get_users_url):
-    assert "users" in get_users_url.json
+def test_get_users_returns_users(client, created_user):
+    response = client.get("/api/users")
+
+    users = response.get_json()["users"]
+
+    assert len(users) == 1
+    assert users[0]["user_name"] == "alex"
